@@ -79,7 +79,7 @@ CayQuanHe FamilyTree::getRelationShip(size_t human1, size_t human2)
 	Human* h2 = FamilyTree::getHuman(human2);
 	
 
-	return CayQuanHe::None;
+	return FamilyTree::getRelationShip(h1, h2);
 }
 
 CayQuanHe FamilyTree::getRelationShip(Human * human1, Human * human2)
