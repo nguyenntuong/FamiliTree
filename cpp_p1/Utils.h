@@ -1,8 +1,9 @@
-#pragma once
+﻿#pragma once
 #include<iostream>
 #include<vector>
 #include<string>
 using namespace std;
+// Lớp tĩnh phụ trợ cắt chuổi
 class Utils
 {
 public:

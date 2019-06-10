@@ -5,8 +5,7 @@ Human::Human(string HoTen,bool GioiTinh):HumanBase(HoTen,GioiTinh)
 	Human::Cha = NULL;
 	Human::Me = NULL;
 	Human::VoChong = NULL;
-	Human::Anh = new vector<Human*>();
-	Human::Em = new vector<Human*>();
+	Human::AnhEm = new vector<Human*>();
 	Human::ConCai = new vector<Human*>();
 	Human::AllRelation = new vector<Human*>();
 }
@@ -50,16 +49,10 @@ void Human::addCon(Human* con)
 	Human::AllRelation->push_back(con);
 }
 
-void Human::addAnh(Human* Anh)
+void Human::addAnhEm(Human* Anh)
 {
-	Human::Anh->push_back(Anh);
+	Human::AnhEm->push_back(Anh);
 	Human::AllRelation->push_back(Anh);
-}
-
-void Human::addEm(Human* Em)
-{
-	Human::Em->push_back(Em);
-	Human::AllRelation->push_back(Em);
 }
 
 bool Human::HasRelation(Human * human)
@@ -73,21 +66,16 @@ bool Human::HasRelation(Human * human)
 	return false;
 }
 
-Human* Human::LaAnh(Human* human)
+vector<Human*>* Human::getAllRelation()
 {
-	for (size_t i = 0; i < Human::Em->size(); i++)
-	{
-		if (Human::Em->at(i) == human)
-			return human;
-	}
-	return NULL;
+	return Human::AllRelation;
 }
 
-Human* Human::LaEm(Human* human)
+Human* Human::LaAnhChiEm(Human* human)
 {
-	for (size_t i = 0; i < Human::Anh->size(); i++)
+	for (size_t i = 0; i < Human::AnhEm->size(); i++)
 	{
-		if (Human::Anh->at(i) == human)
+		if (Human::AnhEm->at(i) == human)
 			return human;
 	}
 	return NULL;

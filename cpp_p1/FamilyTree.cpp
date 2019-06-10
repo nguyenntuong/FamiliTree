@@ -17,6 +17,11 @@ Human* FamilyTree::getHuman(size_t index)
 		return FamilyTree::FTree->at(index);
 }
 
+vector<Human*>* FamilyTree::getAllHuman()
+{
+	return FamilyTree::FTree;;
+}
+
 void FamilyTree::makeRelationShip(Human* human1, Human* human2, Quanhe qh)
 {
 	switch (qh)
@@ -27,11 +32,8 @@ void FamilyTree::makeRelationShip(Human* human1, Human* human2, Quanhe qh)
 	case Quanhe::Me:
 		human1->setMe(human2);
 		break;
-	case Quanhe::Anh:
-		human1->addAnh(human2);
-		break;
-	case Quanhe::Em:
-		human1->addEm(human2);
+	case Quanhe::AnhChiEm:
+		human1->addAnhEm(human2);
 		break;
 	case Quanhe::VoChong:
 		human1->setVoChong(human2);
@@ -53,11 +55,8 @@ void FamilyTree::makeRelationShip(size_t human1, size_t human2, Quanhe qh)
 	case Quanhe::Me:
 		FamilyTree::getHuman(human1)->setMe(FamilyTree::getHuman(human2));
 		break;
-	case Quanhe::Anh:
-		FamilyTree::getHuman(human1)->addAnh(FamilyTree::getHuman(human2));
-		break;
-	case Quanhe::Em:
-		FamilyTree::getHuman(human1)->addEm(FamilyTree::getHuman(human2));
+	case Quanhe::AnhChiEm:
+		FamilyTree::getHuman(human1)->addAnhEm(FamilyTree::getHuman(human2));
 		break;
 	case Quanhe::VoChong:
 		FamilyTree::getHuman(human1)->setVoChong(FamilyTree::getHuman(human2));
@@ -74,36 +73,108 @@ CayQuanHe FamilyTree::getRelationShip(size_t human1, size_t human2)
 {
 	if (human1 < 0 || human1 >= FamilyTree::FTree->size() || human2 < 0 || human2 >= FamilyTree::FTree->size())
 		CayQuanHe::None;
-	vector<Human*> humanTRacking;
+	vector<vector<Human*>>* humanTRacking=new vector<vector<Human*>>();
 	Human* h1 = FamilyTree::getHuman(human1);
 	Human* h2 = FamilyTree::getHuman(human2);
-	
+	FamilyTree::recursiveTracking(h1, h2, vector<Human*>(), humanTRacking);
+	vector<Human*> minimunRelation=humanTRacking->at(0);
+	for (size_t i = 1; i < humanTRacking->size(); i++)
+	{
+		if (humanTRacking->at(i).size() < minimunRelation.size()) {
+			minimunRelation = humanTRacking->at(i);
+		}
+	}
+	int p = FamilyTree::caculateFamilyPoint(minimunRelation);
+	if (p == 0) {
+		if (h1->LaVoChong(h2))
+			return CayQuanHe::VoChong;
+		else
+			return CayQuanHe::AnhChiEm;
+	}
+	else if (p == 1) {
+		if (h2->LaChaMe(h1)||h2->LaChaMe(h1->getVoChong())) {
+			return CayQuanHe::ChaMe;
+		}
+		else {
+			return CayQuanHe::CoChu;
+		}
+	}
+	else if(p>=2)
+	{
+		return CayQuanHe::OngBa;
+	}
+	else {
+		return CayQuanHe::ConChau;
+	}
+	return CayQuanHe::None;
+}
 
-	return FamilyTree::getRelationShip(h1, h2);
+void FamilyTree::recursiveTracking(Human * h, Human * h2, vector<Human*> tracking, vector<vector<Human*>>* manageTracking)
+{
+	tracking.push_back(h);
+	if (h->HasRelation(h2))
+	{
+		tracking.push_back(h2);
+		manageTracking->push_back(tracking);
+	}
+	else {
+		for (size_t i = 0; i < h->getAllRelation()->size(); i++)
+		{
+			bool hasTrack = false;
+			for (size_t j = 0; j < tracking.size(); j++)
+			{
+				if (tracking[j] == h->getAllRelation()->at(i)) {
+					hasTrack = true;
+				}
+			}
+			if (hasTrack) {
+				continue;
+			}
+			FamilyTree::recursiveTracking(h->getAllRelation()->at(i), h2, tracking,manageTracking);
+		}
+	}
+}
+
+int FamilyTree::caculateFamilyPoint(vector<Human*> track)
+{
+	int p = 0;
+	for (size_t i = 1; i < track.size(); i++)
+	{
+		CayQuanHe cqh= FamilyTree::getRelationShip(track.at(i-1),
+			track.at(i)
+			);
+		switch (cqh)
+		{
+		case CayQuanHe::ChaMe:
+			p--;
+			break;
+		case CayQuanHe::VoChong:
+			break;
+		case CayQuanHe::ConCai:
+			p++;
+			break;
+		case CayQuanHe::AnhChiEm:
+			break;
+		default:
+			break;
+		}
+	}
+	return p;
 }
 
 CayQuanHe FamilyTree::getRelationShip(Human * human1, Human * human2)
 {
-	if (human1->LaAnh(human2)) {
-		return CayQuanHe::Anh;
-	}
-	if (human1->LaEm(human2)) {
-		return CayQuanHe::Em;
+	if (human1->LaAnhChiEm(human2)) {
+		return CayQuanHe::AnhChiEm;
 	}
 	if (human1->LaCon(human2)) {
-		return CayQuanHe::Con;
+		return CayQuanHe::ConCai;
 	}
 	if (human1->LaChaMe(human2)) {
-		if (human1->NamGioi())
-			return CayQuanHe::Cha;
-		else
-			return CayQuanHe::Me;
+		return CayQuanHe::ChaMe;
 	}
 	if (human1->LaVoChong(human2)) {
-		if (human1->NamGioi())
-			return CayQuanHe::Chong;
-		else
-			return CayQuanHe::Vo;
+		return CayQuanHe::VoChong;
 	}
 	return CayQuanHe::None;
 }
@@ -113,41 +184,26 @@ string FamilyTree::PrintQH(CayQuanHe cqh)
 	string tmp = "";
 	switch (cqh)
 	{
-	case CayQuanHe::Ong:
-		tmp = "Ong";
+	case CayQuanHe::OngBa:
+		tmp = "Ong Ba";
 		break;
-	case CayQuanHe::Ba:
-		tmp = "Ba";
+	case CayQuanHe::ChaMe:
+		tmp = "Cha Me";
 		break;
-	case CayQuanHe::Cha:
-		tmp = "Cha";
+	case CayQuanHe::VoChong:
+		tmp = "Vo Chong";
 		break;
-	case CayQuanHe::Me:
-		tmp = "Me";
+	case CayQuanHe::ConCai:
+		tmp = "Con Cai";
 		break;
-	case CayQuanHe::Vo:
-		tmp = "Vo";
+	case CayQuanHe::CoChu:
+		tmp = "Co Chu";
 		break;
-	case CayQuanHe::Chong:
-		tmp = "Chong";
+	case CayQuanHe::AnhChiEm:
+		tmp = "Anh Chi Em";
 		break;
-	case CayQuanHe::Con:
-		tmp = "Con";
-		break;
-	case CayQuanHe::Co:
-		tmp = "Co";
-		break;
-	case CayQuanHe::Chu:
-		tmp = "Chu";
-		break;
-	case CayQuanHe::Anh:
-		tmp = "Anh";
-		break;
-	case CayQuanHe::Chi:
-		tmp = "Chi";
-		break;
-	case CayQuanHe::Em:
-		tmp = "Em";
+	case CayQuanHe::ConChau:
+		tmp = "Con Chau";
 		break;
 	case CayQuanHe::None:
 		tmp = "Khong co quan he";

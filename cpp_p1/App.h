@@ -15,5 +15,6 @@ private:
 	void Pause(string message="");
 	void Clear();
 	void FetchData();
+	void PrintListHuman();
 };
 
