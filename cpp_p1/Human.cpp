@@ -36,7 +36,7 @@ Human* Human::getMe()
 void Human::setVoChong(Human* VoChong)
 {
 	Human::VoChong = VoChong;
-	Human::AllRelation->push_back(Human::VoChong;
+	Human::AllRelation->push_back(Human::VoChong);
 }
 
 Human* Human::getVoChong()
